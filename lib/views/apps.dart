@@ -33,23 +33,8 @@ class AppsPageState extends State<AppsPage>
         final appsInfo = ref.watch(appsProvider);
         final mode = ref.watch(modeProvider);
         return Scaffold(
-            extendBodyBehindAppBar: true,
-            appBar: AppBar(
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              actions: [
-                IconButton(
-                  icon: Icon(mode.name == DisplayMode.grid.name
-                      ? Icons.list
-                      : Icons.grid_on),
-                  onPressed: () {
-                    ref.read(modeProvider.notifier).state = mode.name == DisplayMode.grid.name
-                        ? DisplayMode.list
-                        : DisplayMode.grid;
-                  },
-                )
-              ],
-            ),
+            extendBodyBehindAppBar: false,
+            appBar: null,
             body: appsInfo.when(
                 data: (List<Application> apps) => mode.name ==
 		DisplayMode.list.name
@@ -95,6 +80,7 @@ class AppGridItem extends StatelessWidget {
   final ApplicationWithIcon application;
   const AppGridItem({
     required this.application,
+    super.key
   });
 
   @override
@@ -116,7 +102,8 @@ class AppGridItem extends StatelessWidget {
           Text(
             application.appName,
             overflow: TextOverflow.ellipsis,
-            maxLines: 1,
+            maxLines: 2,
+	    textAlign: TextAlign.center,
           ),
         ],
       ),

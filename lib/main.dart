@@ -16,17 +16,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'firmus',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        backgroundColor: Colors.transparent,
+      	scaffoldBackgroundColor: Colors.transparent,
       ),
       onGenerateRoute: (settings) {
           return MaterialPageRoute(
               settings: settings,
               builder: (context) {
                 switch (settings.name) {
-                  case 'apps':
-                    return AppsPage();
+                  case 'settings':
+                    return const HomePage();
                   default:
-                    return HomePage();
+                    return const AppsPage();
                 }
               });
         },
@@ -35,6 +36,8 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
