@@ -17,20 +17,21 @@ class MyApp extends StatelessWidget {
       title: 'firmus',
       theme: ThemeData(
         backgroundColor: Colors.transparent,
-      	scaffoldBackgroundColor: Colors.transparent,
+        scaffoldBackgroundColor: Colors.transparent,
+        primarySwatch: Colors.brown,
       ),
       onGenerateRoute: (settings) {
-          return MaterialPageRoute(
-              settings: settings,
-              builder: (context) {
-                switch (settings.name) {
-                  case 'settings':
-                    return const HomePage();
-                  default:
-                    return const AppsPage();
-                }
-              });
-        },
+        return MaterialPageRoute(
+            settings: settings,
+            builder: (context) {
+              switch (settings.name) {
+                case 'settings':
+                  return const HomePage();
+                default:
+                  return const AppsPage();
+              }
+            });
+      },
     );
   }
 }

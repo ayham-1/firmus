@@ -18,11 +18,20 @@ class AppsPage extends StatefulWidget {
   AppsPageState createState() => AppsPageState();
 }
 
-class AppsPageState extends State<AppsPage>
-    with AutomaticKeepAliveClientMixin {
+class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
+  FocusNode keepFocus = FocusNode();
+
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    keepFocus.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -35,9 +44,12 @@ class AppsPageState extends State<AppsPage>
         return Scaffold(
             extendBodyBehindAppBar: false,
             appBar: null,
-            body: appsInfo.when(
+            body: Stack(children: [
+              appsInfo.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, s) => Container(),
                 data: (List<Application> apps) => mode.name ==
-		DisplayMode.list.name
+                        DisplayMode.list.name
                     ? ListView.builder(
                         itemCount: apps.length,
                         itemBuilder: (BuildContext context, int index) {
@@ -47,27 +59,61 @@ class AppsPageState extends State<AppsPage>
                               app.icon,
                               width: 40,
                             ),
-                            title: Text(app.appName),
+                            title: AppLabel(label: app.appName),
                             onTap: () => DeviceApps.openApp(app.packageName),
                           );
                         },
                       )
-                    : GridView(
+                    : GridView.builder(
                         padding: const EdgeInsets.fromLTRB(
                             16.0, kToolbarHeight + 16.0, 16.0, 16.0),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
+                        itemCount: apps.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
                           crossAxisSpacing: 8.0,
                           mainAxisSpacing: 8.0,
                         ),
-                        children: [
-                          ...apps.map((app) => AppGridItem(
-                                application: app as ApplicationWithIcon,
-                              ))
-                        ],
-                      ),
-                loading: () => const CircularProgressIndicator(),
-                error: (e, s) => Container()));
+                        itemBuilder: (BuildContext context, int index) {
+                          return AppGridItem(
+                              application: apps[index] as ApplicationWithIcon);
+                        }),
+              ),
+              Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Row(children: [
+                    Expanded(
+                        child: TextField(
+                            autofocus: true,
+                            focusNode: keepFocus,
+                            onSubmitted: (val) {
+                              keepFocus.requestFocus();
+                            },
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                            decoration: InputDecoration(
+                              filled: true,
+                              isDense: true,
+                              fillColor: const Color.fromRGBO(51, 49, 49, 1),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(40),
+                                borderSide: const BorderSide(width: 0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(40),
+                                borderSide: const BorderSide(width: 0),
+                              ),
+                            ))),
+                    const Padding(
+                        padding: EdgeInsets.all(15),
+                        child: Image(
+                            image: AssetImage('images/spear.png'),
+                            width: 40,
+                            fit: BoxFit.cover))
+                  ])),
+            ]));
       },
     );
   }
@@ -76,12 +122,42 @@ class AppsPageState extends State<AppsPage>
   bool get wantKeepAlive => true;
 }
 
+class AppLabel extends StatelessWidget {
+  final String label;
+  const AppLabel({required this.label, Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Text(
+          label,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 2
+              ..color = Colors.black,
+          ),
+        ),
+        Text(
+          label,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class AppGridItem extends StatelessWidget {
   final ApplicationWithIcon application;
-  const AppGridItem({
-    required this.application,
-    super.key
-  });
+  const AppGridItem({required this.application, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -96,15 +172,10 @@ class AppGridItem extends StatelessWidget {
             child: Image.memory(
               application.icon,
               fit: BoxFit.contain,
-              width: 40,
+              width: 60,
             ),
           ),
-          Text(
-            application.appName,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-	    textAlign: TextAlign.center,
-          ),
+          AppLabel(label: application.appName),
         ],
       ),
     );
