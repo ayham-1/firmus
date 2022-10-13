@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:firmus/app_state.dart';
 
+import 'search.bar.dart';
+
 final modeProvider = StateProvider<DisplayMode>((ref) => DisplayMode.grid);
 
 enum DisplayMode {
@@ -19,19 +21,9 @@ class AppsPage extends StatefulWidget {
 }
 
 class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
-  FocusNode keepFocus = FocusNode();
-
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    // Clean up the focus node when the Form is disposed.
-    keepFocus.dispose();
-
-    super.dispose();
   }
 
   @override
@@ -79,40 +71,7 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
                               application: apps[index] as ApplicationWithIcon);
                         }),
               ),
-              Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Row(children: [
-                    Expanded(
-                        child: TextField(
-                            autofocus: true,
-                            focusNode: keepFocus,
-                            onSubmitted: (val) {
-                              keepFocus.requestFocus();
-                            },
-                            style: const TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                            ),
-                            decoration: InputDecoration(
-                              filled: true,
-                              isDense: true,
-                              fillColor: const Color.fromRGBO(51, 49, 49, 1),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(40),
-                                borderSide: const BorderSide(width: 0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(40),
-                                borderSide: const BorderSide(width: 0),
-                              ),
-                            ))),
-                    const Padding(
-                        padding: EdgeInsets.all(15),
-                        child: Image(
-                            image: AssetImage('images/spear.png'),
-                            width: 40,
-                            fit: BoxFit.cover))
-                  ])),
+              SearchBar()
             ]));
       },
     );
