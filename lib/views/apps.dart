@@ -2,7 +2,7 @@ import 'package:device_apps/device_apps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:firmus/app_state.dart';
+import 'package:firmus/app.state.dart';
 
 import 'search.bar.dart';
 
@@ -31,7 +31,7 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
     super.build(context);
     return Consumer(
       builder: (context, WidgetRef ref, _) {
-        final appsInfo = ref.watch(appsProvider);
+        final appsInfo = ref.watch(filteredApps);
         final mode = ref.watch(modeProvider);
         return Scaffold(
             extendBodyBehindAppBar: false,
@@ -71,7 +71,7 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
                               application: apps[index] as ApplicationWithIcon);
                         }),
               ),
-              SearchBar()
+              const SearchBar()
             ]));
       },
     );
