@@ -16,7 +16,6 @@ class SearchBarState extends State<SearchBar> {
   @override
   Widget build(BuildContext context) {
     return Consumer(builder: (context, WidgetRef ref, _) {
-      keepFocus.requestFocus();
       return Align(
           alignment: Alignment.bottomCenter,
           child: Container(

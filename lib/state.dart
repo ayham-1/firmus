@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:device_apps/device_apps.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 
 import 'views/item.dart';
 
@@ -24,7 +25,16 @@ final filteredApps = FutureProvider<List<Application>>((ref) {
   final apps = ref.watch(appsProvider).value;
   final tag = ref.watch(searchTerms);
 
-  return apps!.where((map) => map.appName.contains(tag)).toList();
+  if (tag != "") {
+    return extractAllSorted(
+      query: tag,
+      choices: apps!,
+      getter: (x) => x.appName,
+      cutoff: 10,
+    ).map((e) => e.choice).toList();
+  } else {
+    return apps!;
+  }
 });
 
 final contactsProvider = FutureProvider<List<Contact>>(

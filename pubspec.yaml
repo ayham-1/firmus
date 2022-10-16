@@ -5,6 +5,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.0.2
+  fuzzywuzzy: ^0.2.0
 description: A new Flutter project.
 dev_dependencies:
   flutter_lints: ^2.0.0
