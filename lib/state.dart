@@ -1,0 +1,72 @@
+import 'package:flutter/material.dart';
+
+import 'package:device_apps/device_apps.dart';
+import 'package:contacts_service/contacts_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'views/item.dart';
+
+enum ViewMode {
+  showingNone,
+  showingHistory,
+  showingAllApps,
+}
+
+final searchTerms = StateProvider<String>((ref) => "");
+
+final appsProvider = FutureProvider<List<Application>>((ref) =>
+    DeviceApps.getInstalledApplications(
+        includeAppIcons: true,
+        includeSystemApps: true,
+        onlyAppsWithLaunchIntent: true));
+
+final filteredApps = FutureProvider<List<Application>>((ref) {
+  final apps = ref.watch(appsProvider).value;
+  final tag = ref.watch(searchTerms);
+
+  return apps!.where((map) => map.appName.contains(tag)).toList();
+});
+
+final contactsProvider = FutureProvider<List<Contact>>(
+    (ref) => ContactsService.getContacts(withThumbnails: true));
+
+final filteredContacts = FutureProvider<List<Contact>>((ref) {
+  final tag = ref.watch(searchTerms);
+  return ContactsService.getContacts(query: tag);
+});
+
+final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
+  List<ItemView> result = List<ItemView>.empty(growable: true);
+
+  final apps = ref.watch(filteredApps).value!;
+  var appIterator = apps.iterator;
+  while (appIterator.moveNext()) {
+    var app = appIterator.current as ApplicationWithIcon;
+    result.add(ItemView(
+        label: app.appName,
+        packageName: app.packageName,
+        type: ItemViewType.app,
+        icon: Image.memory(
+          app.icon,
+          width: 60,
+        )));
+  }
+
+  final contacts = ref.watch(filteredContacts).value!;
+  var contactIterator = contacts.iterator;
+  while (contactIterator.moveNext()) {
+    var contact = contactIterator.current;
+    result.add(ItemView(
+      label: contact.displayName!,
+      packageName: "",
+      type: ItemViewType.contact,
+      icon: const Image(
+        image: AssetImage('images/avatar.png'),
+        width: 45,
+        fit: BoxFit.cover,
+      ),
+    ));
+  }
+
+  return result;
+});

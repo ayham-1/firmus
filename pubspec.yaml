@@ -1,4 +1,5 @@
 dependencies:
+  contacts_service: ^0.6.3
   cupertino_icons: ^1.0.2
   device_apps: ^2.2.0
   flutter:
@@ -14,6 +15,7 @@ environment:
 flutter:
   assets:
     - images/spear.png
+    - images/avatar.png
   uses-material-design: true
 name: firmus
 publish_to: none

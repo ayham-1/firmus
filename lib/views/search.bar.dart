@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../app.state.dart';
+import '../state.dart';
 
 class SearchBar extends StatefulWidget {
   const SearchBar({super.key});
@@ -12,7 +12,6 @@ class SearchBar extends StatefulWidget {
 
 class SearchBarState extends State<SearchBar> {
   FocusNode keepFocus = FocusNode();
-  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -40,15 +39,13 @@ class SearchBarState extends State<SearchBar> {
                       child: TextField(
                           autofocus: true,
                           focusNode: keepFocus,
-                          controller: _controller,
                           onSubmitted: (val) {
-                            //keepFocus.requestFocus();
-                            ref.read(searchTerms.notifier).state =
-                                _controller.text;
+                            keepFocus.requestFocus();
+                            ref.read(searchTerms.notifier).state = val;
                           },
                           onChanged: (val) {
-                            ref.read(searchTerms.notifier).state =
-                                _controller.text;
+                            keepFocus.requestFocus();
+                            ref.read(searchTerms.notifier).state = val;
                           },
                           style: const TextStyle(
                             fontSize: 18,
@@ -60,29 +57,15 @@ class SearchBarState extends State<SearchBar> {
                             fillColor: const Color.fromRGBO(51, 49, 49, 1),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(40),
-                              borderSide: const BorderSide(width: 0),
+                              borderSide: const BorderSide(),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(40),
-                              borderSide: const BorderSide(width: 0),
+                              borderSide: const BorderSide(),
                             ),
                           ))),
                 ])),
           ));
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(() {
-      final String text = _controller.text;
-      _controller.value = _controller.value.copyWith(
-        text: text,
-        selection:
-            TextSelection(baseOffset: text.length, extentOffset: text.length),
-        composing: TextRange.empty,
-      );
     });
   }
 

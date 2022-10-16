@@ -21,8 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-==============================================================================
-==============================================================================
-==============================================================================
 Spear Icon:
 https://www.flaticon.com/free-icons/spear - Spear icons created by Freepik - Flaticon
+Contacts Icon:
+https://www.flaticon.com/free-icons/user - User icons created by Becris - Flaticon
