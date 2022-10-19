@@ -30,7 +30,7 @@ final filteredApps = FutureProvider<List<Application>>((ref) {
       query: tag,
       choices: apps!,
       getter: (x) => x.appName,
-      cutoff: 10,
+      cutoff: 60,
     ).map((e) => e.choice).toList();
   } else {
     return apps!;

@@ -1,5 +1,9 @@
-import 'package:device_apps/device_apps.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:device_apps/device_apps.dart';
+
+import 'package:firmus/state.dart';
 
 enum ItemViewType { app, contact }
 
@@ -41,30 +45,101 @@ class Label extends StatelessWidget {
   const Label({required this.label, Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Text(
-          label,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            foreground: Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 2
-              ..color = Colors.black,
+    return Consumer(builder: (context, WidgetRef ref, _) {
+      String sourceText = label;
+      String targetText = ref.watch(searchTerms);
+      List<String> snippets = List.empty(growable: true);
+
+      bool isHighlighting = false;
+      String normalText = "", highlightText = "";
+      for (int i = 0; i < sourceText.length; i++) {
+        var sourceChar = sourceText[i];
+        if (targetText.toLowerCase().contains(sourceChar.toLowerCase())) {
+          if (!isHighlighting) {
+            isHighlighting = true;
+            if (normalText != "") {
+              snippets.add(normalText);
+              normalText = "";
+            }
+          }
+          highlightText += sourceChar;
+        } else {
+          if (isHighlighting) {
+            isHighlighting = false;
+            if (highlightText != "") {
+              snippets.add(highlightText);
+              highlightText = "";
+            }
+          }
+          normalText += sourceChar;
+        }
+      }
+      if (!isHighlighting) {
+        if (normalText != "") {
+          snippets.add(normalText);
+          normalText = "";
+        }
+        if (highlightText != "") {
+          snippets.add(highlightText);
+          highlightText = "";
+          isHighlighting = !isHighlighting;
+        }
+      } else {
+        if (highlightText != "") {
+          snippets.add(highlightText);
+          highlightText = "";
+        }
+        if (normalText != "") {
+          snippets.add(normalText);
+          normalText = "";
+          isHighlighting = !isHighlighting;
+        }
+      }
+
+      var normalStyleBg = TextStyle(
+        foreground: Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..color = Colors.black,
+      );
+      var normalStyleFg = const TextStyle(
+        color: Colors.white,
+      );
+      var highlightStyleFg = const TextStyle(
+        color: Colors.green,
+      );
+
+      List<TextSpan> spansFg = List.empty(growable: true);
+      List<TextSpan> spansBg = List.empty(growable: true);
+      isHighlighting =
+          (snippets.length % 2) == 0 ? !isHighlighting : isHighlighting;
+      for (var snippet in snippets) {
+        if (isHighlighting) {
+          spansBg.add(TextSpan(text: snippet, style: normalStyleBg));
+          spansFg.add(TextSpan(text: snippet, style: highlightStyleFg));
+        } else {
+          spansBg.add(TextSpan(text: snippet, style: normalStyleBg));
+          spansFg.add(TextSpan(text: snippet, style: normalStyleFg));
+        }
+        isHighlighting = !isHighlighting;
+      }
+
+      return Stack(
+        children: [
+          Text.rich(
+            TextSpan(children: spansBg),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+            textAlign: TextAlign.center,
           ),
-        ),
-        Text(
-          label,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
+          Text.rich(
+            TextSpan(children: spansFg),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+            textAlign: TextAlign.center,
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }
