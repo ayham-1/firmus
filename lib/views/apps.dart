@@ -8,7 +8,7 @@ import 'item.dart';
 import 'search.bar.dart';
 
 final modeProvider =
-    StateProvider<ItemDisplayMode>((ref) => ItemDisplayMode.grid);
+    StateProvider<ItemDisplayMode>((ref) => ItemDisplayMode.list);
 
 enum ItemDisplayMode {
   grid,
@@ -46,6 +46,7 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
                 data: (List<ItemView> itemViews) =>
                     mode.name == ItemDisplayMode.list.name
                         ? ListView.builder(
+                            reverse: true,
                             itemCount: itemViews.length,
                             itemBuilder: (BuildContext context, int index) {
                               var item = itemViews[index];

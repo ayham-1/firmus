@@ -48,35 +48,43 @@ final filteredContacts = FutureProvider<List<Contact>>((ref) {
 final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
   List<ItemView> result = List<ItemView>.empty(growable: true);
 
-  final apps = ref.watch(filteredApps).value!;
-  var appIterator = apps.iterator;
-  while (appIterator.moveNext()) {
-    var app = appIterator.current as ApplicationWithIcon;
-    result.add(ItemView(
-        label: app.appName,
-        packageName: app.packageName,
-        type: ItemViewType.app,
-        icon: Image.memory(
-          app.icon,
-          width: 60,
-        )));
-  }
+  ref.watch(filteredApps).when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, s) => Container(),
+      data: (apps) {
+        var appIterator = apps.iterator;
+        while (appIterator.moveNext()) {
+          var app = appIterator.current as ApplicationWithIcon;
+          result.add(ItemView(
+              label: app.appName,
+              packageName: app.packageName,
+              type: ItemViewType.app,
+              icon: Image.memory(
+                app.icon,
+                width: 60,
+              )));
+        }
+      });
 
-  final contacts = ref.watch(filteredContacts).value!;
-  var contactIterator = contacts.iterator;
-  while (contactIterator.moveNext()) {
-    var contact = contactIterator.current;
-    result.add(ItemView(
-      label: contact.displayName!,
-      packageName: "",
-      type: ItemViewType.contact,
-      icon: const Image(
-        image: AssetImage('images/avatar.png'),
-        width: 45,
-        fit: BoxFit.cover,
-      ),
-    ));
-  }
+  ref.watch(filteredContacts).when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, s) => Container(),
+      data: (contacts) {
+        var contactIterator = contacts.iterator;
+        while (contactIterator.moveNext()) {
+          var contact = contactIterator.current;
+          result.add(ItemView(
+            label: contact.displayName!,
+            packageName: "",
+            type: ItemViewType.contact,
+            icon: const Image(
+              image: AssetImage('images/avatar.png'),
+              width: 45,
+              fit: BoxFit.cover,
+            ),
+          ));
+        }
+      });
 
   return result;
 });
