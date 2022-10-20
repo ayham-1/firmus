@@ -6,12 +6,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 
 import 'views/item.dart';
+import 'database.dart';
 
 enum ViewMode {
   showingNone,
   showingHistory,
   showingAllApps,
 }
+
+final databaseProvider = FutureProvider<FirmDB>((ref) => FirmDB.load());
+final cachedAppsProvider = FutureProvider<List<ItemView>>((ref) => ref
+    .watch(databaseProvider)
+    .when(
+        loading: () => List.empty(),
+        error: (e, s) => List.empty(),
+        data: (db) => db.get()));
+
+final viewMode = StateProvider<ViewMode>((ref) => ViewMode.showingNone);
 
 final searchTerms = StateProvider<String>((ref) => "");
 
@@ -46,45 +57,51 @@ final filteredContacts = FutureProvider<List<Contact>>((ref) {
 });
 
 final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
-  List<ItemView> result = List<ItemView>.empty(growable: true);
+  final view = ref.watch(viewMode);
+  if (view == ViewMode.showingNone) {
+    return List<ItemView>.empty();
+  } else if (view == ViewMode.showingAllApps) {
+    List<ItemView> result = List<ItemView>.empty(growable: true);
 
-  ref.watch(filteredApps).when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, s) => Container(),
-      data: (apps) {
-        var appIterator = apps.iterator;
-        while (appIterator.moveNext()) {
-          var app = appIterator.current as ApplicationWithIcon;
-          result.add(ItemView(
-              label: app.appName,
-              packageName: app.packageName,
-              type: ItemViewType.app,
-              icon: Image.memory(
-                app.icon,
-                width: 60,
-              )));
-        }
-      });
+    ref.watch(filteredApps).when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, s) => Container(),
+        data: (apps) {
+          var appIterator = apps.iterator;
+          while (appIterator.moveNext()) {
+            var app = appIterator.current as ApplicationWithIcon;
+            result.add(ItemView(
+                label: app.appName,
+                packageName: app.packageName,
+                type: ItemViewType.app,
+                icon: Image.memory(
+                  app.icon,
+                  width: 60,
+                )));
+          }
+        });
 
-  ref.watch(filteredContacts).when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, s) => Container(),
-      data: (contacts) {
-        var contactIterator = contacts.iterator;
-        while (contactIterator.moveNext()) {
-          var contact = contactIterator.current;
-          result.add(ItemView(
-            label: contact.displayName!,
-            packageName: "",
-            type: ItemViewType.contact,
-            icon: const Image(
-              image: AssetImage('images/avatar.png'),
-              width: 45,
-              fit: BoxFit.cover,
-            ),
-          ));
-        }
-      });
-
-  return result;
+    ref.watch(filteredContacts).when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, s) => Container(),
+        data: (contacts) {
+          var contactIterator = contacts.iterator;
+          while (contactIterator.moveNext()) {
+            var contact = contactIterator.current;
+            result.add(ItemView(
+              label: contact.displayName!,
+              packageName: "",
+              type: ItemViewType.contact,
+              icon: const Image(
+                image: AssetImage('images/avatar.png'),
+                width: 45,
+                fit: BoxFit.cover,
+              ),
+            ));
+          }
+        });
+    return result;
+  } else {
+    return List<ItemView>.empty();
+  }
 });
