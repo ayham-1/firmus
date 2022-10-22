@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:firmus/views/apps.dart';
-import 'package:firmus/state.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await [
+    Permission.contacts,
+  ].request();
 
   runApp(const ProviderScope(child: MyApp()));
 }

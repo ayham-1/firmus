@@ -7,8 +7,10 @@ dependencies:
   flutter_riverpod: ^2.0.2
   fuzzywuzzy: ^0.2.0
   path: ^1.8.2
+  permission_handler: ^10.2.0
   sqflite: ^2.1.0+1
-description: A new Flutter project.
+description: 'A trusty, strong and reliable application launcher for Android - because
+  all others are crap.'
 dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_test:
