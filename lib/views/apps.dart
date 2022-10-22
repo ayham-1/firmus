@@ -8,7 +8,7 @@ import 'item.dart';
 import 'search.bar.dart';
 
 final modeProvider =
-    StateProvider<ItemDisplayMode>((ref) => ItemDisplayMode.list);
+    StateProvider<ItemDisplayMode>((ref) => ItemDisplayMode.grid);
 
 enum ItemDisplayMode {
   grid,

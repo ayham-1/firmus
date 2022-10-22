@@ -41,10 +41,24 @@ class SearchBarState extends State<SearchBar> {
                           onSubmitted: (val) {
                             keepFocus.requestFocus();
                             ref.read(searchTerms.notifier).state = val;
+                            if (val != "") {
+                              ref.read(viewMode.notifier).state =
+                                  ViewMode.showingAllApps;
+                            } else {
+                              ref.read(viewMode.notifier).state =
+                                  ViewMode.showingNone;
+                            }
                           },
                           onChanged: (val) {
                             keepFocus.requestFocus();
                             ref.read(searchTerms.notifier).state = val;
+                            if (val != "") {
+                              ref.read(viewMode.notifier).state =
+                                  ViewMode.showingAllApps;
+                            } else {
+                              ref.read(viewMode.notifier).state =
+                                  ViewMode.showingNone;
+                            }
                           },
                           style: const TextStyle(
                             fontSize: 18,

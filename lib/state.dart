@@ -15,14 +15,14 @@ enum ViewMode {
 }
 
 final databaseProvider = FutureProvider<FirmDB>((ref) => FirmDB.load());
-final cachedAppsProvider = FutureProvider<List<ItemView>>((ref) => ref
+final historyAppProvider = FutureProvider<List<String>>((ref) => ref
     .watch(databaseProvider)
     .when(
         loading: () => List.empty(),
         error: (e, s) => List.empty(),
-        data: (db) => db.get()));
+        data: (db) => db.getHistory()));
 
-final viewMode = StateProvider<ViewMode>((ref) => ViewMode.showingNone);
+final viewMode = StateProvider<ViewMode>((ref) => ViewMode.showingHistory);
 
 final searchTerms = StateProvider<String>((ref) => "");
 
@@ -60,6 +60,27 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
   final view = ref.watch(viewMode);
   if (view == ViewMode.showingNone) {
     return List<ItemView>.empty();
+  } else if (view == ViewMode.showingHistory) {
+    List<ItemView> result = List<ItemView>.empty(growable: true);
+    ref.watch(historyAppProvider).when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, s) => Container(),
+        data: (pkg) {
+          var pkgIterator = pkg.iterator;
+          while (pkgIterator.moveNext()) {
+            var app =
+                DeviceApps.getApp(pkgIterator.current) as ApplicationWithIcon;
+            result.add(ItemView(
+                label: app.appName,
+                packageName: app.packageName,
+                type: ItemViewType.app,
+                icon: Image.memory(
+                  app.icon,
+                  width: 60,
+                )));
+          }
+        });
+    return result;
   } else if (view == ViewMode.showingAllApps) {
     List<ItemView> result = List<ItemView>.empty(growable: true);
 

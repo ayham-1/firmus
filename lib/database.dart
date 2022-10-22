@@ -27,46 +27,24 @@ class FirmDB {
     return firmdb;
   }
 
-  Future<List<ItemView>> get() async {
+  Future<List<String>> getHistory() async {
     final Database db = await database;
 
-    final List<Map<String, dynamic>> maps = await db.query("cachedApps");
+    final List<Map<String, dynamic>> maps =
+        await db.query("historyApps", orderBy: 'weight');
 
     return List.generate(maps.length, (i) {
-      return ItemView(
-        packageName: maps[i]["pkg"],
-        label: maps[i]["label"],
-        icon: maps[i]["icon"],
-        type: ItemViewType.app,
-      );
+      return maps[i]["pkg"];
     });
   }
 
-  Future<void> updateApp(ItemView app) async {
+  Future<void> updateHistory(ItemView app, int weight) async {
     final Database db = await database;
     await db.update(
-      'cachedApps',
-      {'label': app.label, 'icon': ''}, //TODO: add BASE64 image storage
+      'historyApps',
+      {'weight': weight},
       where: "pkg = ?",
       whereArgs: [app.packageName],
     );
-  }
-
-  Future<void> updateApps(List<ItemView> apps) async {
-    final Database db = await database;
-    Batch batch = db.batch();
-
-    for (var app in apps) {
-      batch.insert(
-        'cachedApps',
-        {
-          'pkg': app.packageName,
-          'label': app.label,
-          'icon': ''
-        }, //TODO: add BASE64 image storage
-      );
-    }
-
-    await batch.commit(noResult: true);
   }
 }
