@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:device_apps/device_apps.dart';
-import 'package:contacts_service/contacts_service.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 
@@ -14,6 +14,15 @@ enum ViewMode {
   showingAllApps,
 }
 
+enum ItemDisplayMode { grid, list }
+
+final viewMode = StateProvider<ViewMode>((ref) => ViewMode.showingNone);
+
+final modeProvider =
+    StateProvider<ItemDisplayMode>((ref) => ItemDisplayMode.grid);
+
+final searchTerms = StateProvider<String>((ref) => "");
+
 final databaseProvider = FutureProvider<FirmDB>((ref) => FirmDB.load());
 final historyAppProvider = FutureProvider<List<String>>((ref) => ref
     .watch(databaseProvider)
@@ -21,10 +30,6 @@ final historyAppProvider = FutureProvider<List<String>>((ref) => ref
         loading: () => List.empty(),
         error: (e, s) => List.empty(),
         data: (db) => db.getHistory()));
-
-final viewMode = StateProvider<ViewMode>((ref) => ViewMode.showingHistory);
-
-final searchTerms = StateProvider<String>((ref) => "");
 
 final appsProvider = FutureProvider<List<Application>>((ref) =>
     DeviceApps.getInstalledApplications(
@@ -49,11 +54,22 @@ final filteredApps = FutureProvider<List<Application>>((ref) {
 });
 
 final contactsProvider = FutureProvider<List<Contact>>(
-    (ref) => ContactsService.getContacts(withThumbnails: true));
+    (ref) => FlutterContacts.getContacts(withPhoto: true));
 
 final filteredContacts = FutureProvider<List<Contact>>((ref) {
+  final contacts = ref.watch(contactsProvider).value;
   final tag = ref.watch(searchTerms);
-  return ContactsService.getContacts(query: tag);
+
+  if (tag != "") {
+    return extractAllSorted(
+      query: tag,
+      choices: contacts!,
+      getter: (x) => x.displayName,
+      cutoff: 60,
+    ).map((e) => e.choice).toList();
+  } else {
+    return List.empty();
+  }
 });
 
 final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
@@ -74,6 +90,7 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
                 label: app.appName,
                 packageName: app.packageName,
                 type: ItemViewType.app,
+                contact: Contact(),
                 icon: Image.memory(
                   app.icon,
                   width: 60,
@@ -83,6 +100,31 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
     return result;
   } else if (view == ViewMode.showingAllApps) {
     List<ItemView> result = List<ItemView>.empty(growable: true);
+
+    ref.watch(filteredContacts).when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, s) => Container(),
+        data: (contacts) {
+          var contactIterator = contacts.iterator;
+          while (contactIterator.moveNext()) {
+            var contact = contactIterator.current;
+            result.add(ItemView(
+                label: contact.displayName,
+                packageName: "",
+                type: ItemViewType.contact,
+                contact: contact,
+                icon: contact.photo != null
+                    ? Image.memory(
+                        contact.photo!,
+                        width: 60,
+                      )
+                    : const Image(
+                        image: AssetImage('images/avatar.png'),
+                        width: 45,
+                        fit: BoxFit.cover,
+                      )));
+          }
+        });
 
     ref.watch(filteredApps).when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -95,6 +137,7 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
                 label: app.appName,
                 packageName: app.packageName,
                 type: ItemViewType.app,
+                contact: Contact(),
                 icon: Image.memory(
                   app.icon,
                   width: 60,
@@ -102,25 +145,6 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
           }
         });
 
-    ref.watch(filteredContacts).when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => Container(),
-        data: (contacts) {
-          var contactIterator = contacts.iterator;
-          while (contactIterator.moveNext()) {
-            var contact = contactIterator.current;
-            result.add(ItemView(
-              label: contact.displayName!,
-              packageName: "",
-              type: ItemViewType.contact,
-              icon: const Image(
-                image: AssetImage('images/avatar.png'),
-                width: 45,
-                fit: BoxFit.cover,
-              ),
-            ));
-          }
-        });
     return result;
   } else {
     return List<ItemView>.empty();

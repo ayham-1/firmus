@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:device_apps/device_apps.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 
 import 'package:firmus/state.dart';
 
@@ -11,6 +12,7 @@ class ItemView extends StatelessWidget {
   final ItemViewType type;
   final String label;
   final String packageName;
+  final Contact contact;
   final Image icon;
 
   const ItemView({
@@ -18,25 +20,44 @@ class ItemView extends StatelessWidget {
     required this.type,
     required this.icon,
     required this.packageName,
+    required this.contact,
     super.key,
   });
 
+  void onTap() {
+    if (type == ItemViewType.app) {
+      DeviceApps.openApp(packageName);
+    } else if (type == ItemViewType.contact) {
+      FlutterContacts.openExternalView(contact.id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        DeviceApps.openApp(packageName);
-      },
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            child: icon,
+    return Consumer(builder: (context, WidgetRef ref, _) {
+      if (ref.watch(modeProvider) == ItemDisplayMode.grid) {
+        return InkWell(
+          onTap: () => onTap(),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                child: icon,
+              ),
+              Label(label: label),
+            ],
           ),
-          Label(label: label),
-        ],
-      ),
-    );
+        );
+      } else if (ref.watch(modeProvider) == ItemDisplayMode.list) {
+        return ListTile(
+          leading: icon,
+          title: Label(label: label),
+          onTap: () => onTap(),
+        );
+      } else {
+        return Container();
+      }
+    });
   }
 }
 

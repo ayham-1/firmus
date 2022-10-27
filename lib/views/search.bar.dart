@@ -26,7 +26,16 @@ class SearchBarState extends State<SearchBar> {
                   Expanded(
                       flex: 2,
                       child: MaterialButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            if (ref.read(viewMode.notifier).state ==
+                                ViewMode.showingAllApps) {
+                              ref.read(viewMode.notifier).state =
+                                  ViewMode.showingNone;
+                            } else {
+                              ref.read(viewMode.notifier).state =
+                                  ViewMode.showingAllApps;
+                            }
+                          },
                           color: const Color.fromRGBO(51, 49, 49, 1),
                           shape: const CircleBorder(),
                           child: const Image(
@@ -44,9 +53,6 @@ class SearchBarState extends State<SearchBar> {
                             if (val != "") {
                               ref.read(viewMode.notifier).state =
                                   ViewMode.showingAllApps;
-                            } else {
-                              ref.read(viewMode.notifier).state =
-                                  ViewMode.showingNone;
                             }
                           },
                           onChanged: (val) {
@@ -55,9 +61,6 @@ class SearchBarState extends State<SearchBar> {
                             if (val != "") {
                               ref.read(viewMode.notifier).state =
                                   ViewMode.showingAllApps;
-                            } else {
-                              ref.read(viewMode.notifier).state =
-                                  ViewMode.showingNone;
                             }
                           },
                           style: const TextStyle(
