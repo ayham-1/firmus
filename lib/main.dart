@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:firmus/views/apps.dart';
+import 'package:firmus/views/item.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await [
     Permission.contacts,
   ].request();
+
+  await Hive.initFlutter();
+  Hive.registerAdapter(ItemViewTypeAdapter());
+  Hive.registerAdapter(ItemAdapter());
+  await Hive.openBox("history");
 
   runApp(const ProviderScope(child: MyApp()));
 }

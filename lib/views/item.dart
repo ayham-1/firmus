@@ -1,12 +1,50 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:hive/hive.dart';
 
 import 'package:device_apps/device_apps.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 
 import 'package:firmus/state.dart';
 
-enum ItemViewType { app, contact }
+part 'item.g.dart';
+
+@HiveType(typeId: 2)
+enum ItemViewType {
+  @HiveField(0)
+  app,
+  @HiveField(1)
+  contact,
+}
+
+@HiveType(typeId: 1)
+class Item extends HiveObject {
+  @HiveField(0)
+  String packageName = "";
+
+  @HiveField(1)
+  ItemViewType type = ItemViewType.app;
+
+  @HiveField(2)
+  String label = "";
+
+  @HiveField(3)
+  String contactID = "";
+
+  @HiveField(4)
+  int openCount = 0;
+
+  Item({
+    required this.label,
+    required this.type,
+    required this.packageName,
+    required this.contactID,
+    required this.openCount,
+  });
+}
 
 class ItemView extends StatelessWidget {
   final ItemViewType type;
@@ -14,6 +52,7 @@ class ItemView extends StatelessWidget {
   final String packageName;
   final Contact contact;
   final Image icon;
+  final int openCount;
 
   const ItemView({
     required this.label,
@@ -21,15 +60,27 @@ class ItemView extends StatelessWidget {
     required this.icon,
     required this.packageName,
     required this.contact,
+    required this.openCount,
     super.key,
   });
 
-  void onTap() {
+  void onTap(WidgetRef ref) {
     if (type == ItemViewType.app) {
       DeviceApps.openApp(packageName);
+      Hive.box("history").put(packageName, _toHiveItem());
     } else if (type == ItemViewType.contact) {
       FlutterContacts.openExternalView(contact.id);
     }
+  }
+
+  Item _toHiveItem() {
+    return Item(
+      type: type,
+      label: label,
+      packageName: packageName,
+      contactID: contact.id,
+      openCount: openCount + 1,
+    );
   }
 
   @override
@@ -37,7 +88,7 @@ class ItemView extends StatelessWidget {
     return Consumer(builder: (context, WidgetRef ref, _) {
       if (ref.watch(modeProvider) == ItemDisplayMode.grid) {
         return InkWell(
-          onTap: () => onTap(),
+          onTap: () => onTap(ref),
           child: Column(
             children: [
               Container(
@@ -52,7 +103,7 @@ class ItemView extends StatelessWidget {
         return ListTile(
           leading: icon,
           title: Label(label: label),
-          onTap: () => onTap(),
+          onTap: () => onTap(ref),
         );
       } else {
         return Container();

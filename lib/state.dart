@@ -4,9 +4,9 @@ import 'package:device_apps/device_apps.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
+import 'package:hive/hive.dart';
 
 import 'views/item.dart';
-import 'database.dart';
 
 enum ViewMode {
   showingNone,
@@ -22,14 +22,6 @@ final modeProvider =
     StateProvider<ItemDisplayMode>((ref) => ItemDisplayMode.grid);
 
 final searchTerms = StateProvider<String>((ref) => "");
-
-final databaseProvider = FutureProvider<FirmDB>((ref) => FirmDB.load());
-final historyAppProvider = FutureProvider<List<String>>((ref) => ref
-    .watch(databaseProvider)
-    .when(
-        loading: () => List.empty(),
-        error: (e, s) => List.empty(),
-        data: (db) => db.getHistory()));
 
 final appsProvider = FutureProvider<List<Application>>((ref) =>
     DeviceApps.getInstalledApplications(
@@ -77,26 +69,31 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
   if (view == ViewMode.showingNone) {
     return List<ItemView>.empty();
   } else if (view == ViewMode.showingHistory) {
-    List<ItemView> result = List<ItemView>.empty(growable: true);
-    ref.watch(historyAppProvider).when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => Container(),
-        data: (pkg) {
-          var pkgIterator = pkg.iterator;
-          while (pkgIterator.moveNext()) {
-            var app =
-                DeviceApps.getApp(pkgIterator.current) as ApplicationWithIcon;
-            result.add(ItemView(
-                label: app.appName,
-                packageName: app.packageName,
-                type: ItemViewType.app,
-                contact: Contact(),
-                icon: Image.memory(
-                  app.icon,
-                  width: 60,
-                )));
-          }
-        });
+    var result = List<ItemView>.empty(growable: true);
+    var history = Hive.box("history").values.toList();
+    history.sort((a, b) => b.openCount.compareTo(a.openCount));
+    var historyIterator = history.iterator;
+
+    while (historyIterator.moveNext()) {
+      Item historyItem = historyIterator.current;
+
+      if (!(await DeviceApps.isAppInstalled(historyItem.packageName))) {
+        historyItem.delete();
+        continue;
+      }
+
+      final app = (await DeviceApps.getApp(historyItem.packageName, true))
+          as ApplicationWithIcon;
+
+      result.add(ItemView(
+        label: historyItem.label,
+        packageName: historyItem.packageName,
+        type: ItemViewType.app,
+        contact: Contact(),
+        openCount: historyItem.openCount,
+        icon: Image.memory(app.icon, width: 60),
+      ));
+    }
     return result;
   } else if (view == ViewMode.showingAllApps) {
     List<ItemView> result = List<ItemView>.empty(growable: true);
@@ -112,6 +109,7 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
                 label: contact.displayName,
                 packageName: "",
                 type: ItemViewType.contact,
+                openCount: 0,
                 contact: contact,
                 icon: contact.photo != null
                     ? Image.memory(
@@ -137,6 +135,7 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
                 label: app.appName,
                 packageName: app.packageName,
                 type: ItemViewType.app,
+                openCount: 0,
                 contact: Contact(),
                 icon: Image.memory(
                   app.icon,

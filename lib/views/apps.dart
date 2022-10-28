@@ -25,6 +25,8 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
     super.build(context);
     return Consumer(
       builder: (context, WidgetRef ref, _) {
+        ref.watch(appsProvider);
+        ref.watch(contactsProvider);
         final itemListProv = ref.watch(itemListProvider);
         final mode = ref.watch(modeProvider);
         return Scaffold(
@@ -37,8 +39,16 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
                           const Center(child: CircularProgressIndicator()),
                       error: (e, s) => Container(),
                       data: (List<ItemView> itemViews) => GestureDetector(
-                            onTap: () => ref.read(viewMode.notifier).state =
-                                ViewMode.showingHistory,
+                            onTap: () {
+                              if (ref.read(viewMode.notifier).state !=
+                                  ViewMode.showingNone) {
+                                ref.read(viewMode.notifier).state =
+                                    ViewMode.showingNone;
+                              } else {
+                                ref.read(viewMode.notifier).state =
+                                    ViewMode.showingHistory;
+                              }
+                            },
                             child: mode.name == ItemDisplayMode.list.name
                                 ? ListView.builder(
                                     reverse: true,
