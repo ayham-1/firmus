@@ -49,6 +49,9 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
                                     ViewMode.showingHistory;
                               }
                             },
+                            onLongPress: () {
+                              Navigator.pushNamed(context, "/settings");
+                            },
                             child: mode.name == ItemDisplayMode.list.name
                                 ? ListView.builder(
                                     reverse: true,

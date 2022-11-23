@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,16 +61,6 @@ class ItemView extends StatelessWidget {
     required this.openCount,
     super.key,
   });
-
-  void onTap(WidgetRef ref) {
-    if (type == ItemViewType.app) {
-      DeviceApps.openApp(packageName);
-      Hive.box("history").put(packageName, _toHiveItem());
-    } else if (type == ItemViewType.contact) {
-      FlutterContacts.openExternalView(contact.id);
-    }
-  }
-
   Item _toHiveItem() {
     return Item(
       type: type,
@@ -88,7 +76,8 @@ class ItemView extends StatelessWidget {
     return Consumer(builder: (context, WidgetRef ref, _) {
       if (ref.watch(modeProvider) == ItemDisplayMode.grid) {
         return InkWell(
-          onTap: () => onTap(ref),
+          onTap: () => _onTap(ref),
+          onLongPress: () => _onLongPress(context, ref),
           child: Column(
             children: [
               Container(
@@ -103,12 +92,30 @@ class ItemView extends StatelessWidget {
         return ListTile(
           leading: icon,
           title: Label(label: label),
-          onTap: () => onTap(ref),
+          onTap: () => _onTap(ref),
+          onLongPress: () => _onLongPress(context, ref),
         );
       } else {
         return Container();
       }
     });
+  }
+
+  void _onTap(WidgetRef ref) {
+    if (type == ItemViewType.app) {
+      DeviceApps.openApp(packageName);
+      Hive.box("history").put(packageName, _toHiveItem());
+    } else if (type == ItemViewType.contact) {
+      FlutterContacts.openExternalView(contact.id);
+    }
+  }
+
+  void _onLongPress(BuildContext context, WidgetRef ref) {
+    if (type == ItemViewType.app) {
+      DeviceApps.openAppSettings(packageName);
+    } else if (type == ItemViewType.contact) {
+      FlutterContacts.openExternalView(contact.id);
+    }
   }
 }
 

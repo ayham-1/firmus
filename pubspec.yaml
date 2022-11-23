@@ -12,6 +12,7 @@ dependencies:
   json_annotation: ^4.4.0
   path: ^1.8.2
   permission_handler: ^10.2.0
+  star_menu: ^3.1.0+1
 description: 'A trusty, strong and reliable application launcher for Android - because
   all others are crap.'
 dev_dependencies:
