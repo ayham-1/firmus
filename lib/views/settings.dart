@@ -72,21 +72,12 @@ class _SettingsState extends State<Settings> {
                         ),
                         SettingsTile.switchTile(
                           onToggle: (value) => prefs
-                              .setBool("useSmartOrder", value)
-                              .then((value) => setState(() => {})),
-                          title: const Text("Use Smart Contacts/Apps Order"),
-                          leading: const Icon(Icons.smart_button),
-                          initialValue: prefs.getBool("useSmartOrder") ?? true,
-                        ),
-                        SettingsTile.switchTile(
-                          onToggle: (value) => prefs
                               .setBool("preferAppsOverContacts", value)
                               .then((value) => setState(() => {})),
                           initialValue: prefs.getBool("preferAppsOverContacts"),
                           title: const Text(
                               "Prefer Applications over contacts when searching"),
                           leading: const Icon(Icons.adb),
-                          enabled: !(prefs.getBool("useSmartOrder") ?? false),
                         ),
                       ],
                     ),

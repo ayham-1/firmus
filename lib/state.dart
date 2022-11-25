@@ -107,7 +107,7 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
   } else if (view == ViewMode.showingAllApps) {
     List<ItemView> result = List<ItemView>.empty(growable: true);
 
-    ref.watch(filteredContacts).when(
+    filterContacts() => ref.watch(filteredContacts).when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, s) => Container(),
         data: (contacts) {
@@ -133,7 +133,7 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
           }
         });
 
-    ref.watch(filteredApps).when(
+    filterApps() => ref.watch(filteredApps).when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, s) => Container(),
         data: (apps) {
@@ -152,6 +152,16 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
                 )));
           }
         });
+
+    ref.watch(settingsProvider).whenData((prefs) async {
+      if ((prefs.getBool("preferAppsOverContacts") ?? false)) {
+        filterApps();
+        filterContacts();
+      } else {
+        filterContacts();
+        filterApps();
+      }
+    });
 
     return result;
   } else {
