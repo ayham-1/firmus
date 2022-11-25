@@ -3,6 +3,7 @@ dependencies:
   device_apps: ^2.2.0
   flutter:
     sdk: flutter
+  flutter_colorpicker: ^1.0.3
   flutter_contacts: ^1.1.5
   flutter_riverpod: ^1.0.0
   fuzzywuzzy: ^0.2.0
@@ -12,6 +13,8 @@ dependencies:
   json_annotation: ^4.4.0
   path: ^1.8.2
   permission_handler: ^10.2.0
+  settings_ui: ^2.0.2
+  shared_preferences: ^2.0.15
   star_menu: ^3.1.0+1
 description: 'A trusty, strong and reliable application launcher for Android - because
   all others are crap.'

@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:firmus/views/apps.dart';
+import 'package:firmus/views/settings.dart';
 import 'package:firmus/views/item.dart';
 
 void main() async {
@@ -33,34 +34,14 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: Colors.transparent,
           primarySwatch: Colors.brown,
         ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+          backgroundColor: Colors.transparent,
+          scaffoldBackgroundColor: Colors.transparent,
+        ),
         routes: {
           '/': (context) => const AppsPage(),
-          '/settings': (context) => const HomePage(),
+          '/settings': (context) => const Settings(),
         });
-  }
-}
-
-class HomePage extends ConsumerWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.transparent,
-        elevation: 0,
-        child: SizedBox(
-          height: 70,
-          child: Center(
-            child: IconButton(
-              icon: const Icon(Icons.apps),
-              onPressed: () => Navigator.pushNamed(context, 'apps'),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
