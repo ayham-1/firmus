@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,7 +29,7 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
         ref.watch(appsProvider);
         ref.watch(contactsProvider);
         final itemListProv = ref.watch(itemListProvider);
-        final mode = ref.watch(modeProvider);
+        final mode = ref.watch(itemDisplayProvider);
         return Scaffold(
             extendBodyBehindAppBar: false,
             appBar: null,
@@ -45,12 +46,20 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
                                 ref.read(viewMode.notifier).state =
                                     ViewMode.showingNone;
                               } else {
-                                ref.read(viewMode.notifier).state =
-                                    ViewMode.showingHistory;
+                                ref
+                                    .watch(settingsProvider)
+                                    .whenData((prefs) async {
+                                  if (!(prefs.getBool("disableHistory") ??
+                                      false)) {
+                                    ref.read(viewMode.notifier).state =
+                                        ViewMode.showingHistory;
+                                  }
+                                });
                               }
                             },
                             onLongPress: () {
                               Navigator.pushNamed(context, "/settings");
+                              HapticFeedback.lightImpact();
                             },
                             child: mode.name == ItemDisplayMode.list.name
                                 ? ListView.builder(

@@ -74,7 +74,7 @@ class ItemView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer(builder: (context, WidgetRef ref, _) {
-      if (ref.watch(modeProvider) == ItemDisplayMode.grid) {
+      if (ref.watch(itemDisplayProvider) == ItemDisplayMode.grid) {
         return InkWell(
           onTap: () => _onTap(ref),
           onLongPress: () => _onLongPress(context, ref),
@@ -88,7 +88,7 @@ class ItemView extends StatelessWidget {
             ],
           ),
         );
-      } else if (ref.watch(modeProvider) == ItemDisplayMode.list) {
+      } else if (ref.watch(itemDisplayProvider) == ItemDisplayMode.list) {
         return ListTile(
           leading: icon,
           title: Label(label: label),
@@ -104,7 +104,12 @@ class ItemView extends StatelessWidget {
   void _onTap(WidgetRef ref) {
     if (type == ItemViewType.app) {
       DeviceApps.openApp(packageName);
-      Hive.box("history").put(packageName, _toHiveItem());
+      ref.watch(settingsProvider).whenData((prefs) async {
+        if (!(prefs.getBool("disableHistory") ?? false)) {
+          if (!Hive.isBoxOpen("history")) await Hive.openBox("history");
+          Hive.box("history").put(packageName, _toHiveItem());
+        }
+      });
     } else if (type == ItemViewType.contact) {
       FlutterContacts.openExternalView(contact.id);
     }

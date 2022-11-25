@@ -1,12 +1,16 @@
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
 
-import 'package:device_apps/device_apps.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fuzzywuzzy/fuzzywuzzy.dart';
-import 'package:hive/hive.dart';
+import "package:device_apps/device_apps.dart";
+import "package:flutter_contacts/flutter_contacts.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:fuzzywuzzy/fuzzywuzzy.dart";
+import "package:hive/hive.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
-import 'views/item.dart';
+import "views/item.dart";
+
+final settingsProvider =
+    FutureProvider<SharedPreferences>((ref) => SharedPreferences.getInstance());
 
 enum ViewMode {
   showingNone,
@@ -16,9 +20,14 @@ enum ViewMode {
 
 enum ItemDisplayMode { grid, list }
 
-final viewMode = StateProvider<ViewMode>((ref) => ViewMode.showingNone);
+final viewMode =
+    StateProvider<ViewMode>((ref) => ref.watch(settingsProvider).when(
+          error: (e, s) => ViewMode.showingNone,
+          loading: () => ViewMode.showingNone,
+          data: (prefs) => ViewMode.values[prefs.getInt("startupPage") ?? 0],
+        ));
 
-final modeProvider =
+final itemDisplayProvider =
     StateProvider<ItemDisplayMode>((ref) => ItemDisplayMode.grid);
 
 final searchTerms = StateProvider<String>((ref) => "");
@@ -117,7 +126,7 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
                         width: 60,
                       )
                     : const Image(
-                        image: AssetImage('images/avatar.png'),
+                        image: AssetImage("images/avatar.png"),
                         width: 45,
                         fit: BoxFit.cover,
                       )));
