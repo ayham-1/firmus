@@ -13,7 +13,6 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  String startupPage = pagesList.first;
   Color pickerColor = const Color(0xff443a49);
 
   @override
@@ -32,9 +31,10 @@ class _SettingsState extends State<Settings> {
                         title: const Text("Startup Page"),
                         leading: const Icon(Icons.home),
                         trailing: DropdownButton<String>(
-                          value: startupPage,
-                          onChanged: (String? toValue) =>
-                              setState(() => startupPage = toValue!),
+                          value: pagesList.first,
+                          onChanged: (String? toValue) => prefs.data
+                              ?.setString('disableHistory', toValue!)
+                              .then((value) => setState(() => {})),
                           items: pagesList
                               .map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
@@ -59,7 +59,8 @@ class _SettingsState extends State<Settings> {
                             .then((value) => setState(() => {})),
                         title: const Text("Use Smart Contacts/Apps Order"),
                         leading: const Icon(Icons.smart_button),
-                        initialValue: prefs.data?.getBool('useSmartOrder'),
+                        initialValue:
+                            prefs.data?.getBool('useSmartOrder') ?? true,
                       ),
                       SettingsTile.switchTile(
                         onToggle: (value) => prefs.data
@@ -70,7 +71,8 @@ class _SettingsState extends State<Settings> {
                         title: const Text(
                             "Prefer Applications over contacts when searching"),
                         leading: const Icon(Icons.adb),
-                        enabled: false,
+                        enabled:
+                            !(prefs.data?.getBool('useSmartOrder') ?? false),
                       ),
                     ],
                   ),
@@ -81,23 +83,25 @@ class _SettingsState extends State<Settings> {
                         onToggle: (value) => prefs.data
                             ?.setBool('leftHandLayout', value)
                             .then((value) => setState(() => {})),
-                        initialValue: prefs.data?.getBool('leftHandLayout'),
+                        initialValue:
+                            prefs.data?.getBool('leftHandLayout') ?? true,
                         leading: const Icon(Icons.language),
                         title: const Text('Left Hand User layout'),
                       ),
                       SettingsTile.switchTile(
-                        onToggle: (value) {
-                          prefs.data?.setBool('useGrid', value);
-                        },
-                        initialValue: prefs.data?.getBool('useGrid'),
+                        onToggle: (value) => prefs.data
+                            ?.setBool('useGrid', value)
+                            .then((value) => setState(() => {})),
+                        initialValue: prefs.data?.getBool('useGrid') ?? true,
                         leading: const Icon(Icons.grid_3x3),
                         title: const Text('Use Grid Layout'),
                       ),
                       SettingsTile.switchTile(
                         onToggle: (value) => prefs.data
-                            ?.setBool('useCustomtheme', value)
+                            ?.setBool('useCustomTheme', value)
                             .then((value) => setState(() => {})),
-                        initialValue: prefs.data?.getBool('useCustomTheme'),
+                        initialValue:
+                            prefs.data?.getBool('useCustomTheme') ?? false,
                         leading: const Icon(Icons.format_paint),
                         title: const Text('Enable custom theme'),
                       ),
@@ -110,28 +114,34 @@ class _SettingsState extends State<Settings> {
                         onToggle: (value) => prefs.data
                             ?.setBool('useDeviceBg', value)
                             .then((value) => setState(() => {})),
-                        initialValue: prefs.data?.getBool('useDeviceBg'),
+                        initialValue:
+                            prefs.data?.getBool('useDeviceBg') ?? true,
                         leading: const Icon(Icons.device_hub),
                         title: const Text('Use device background'),
-                        enabled: false,
+                        enabled:
+                            (prefs.data?.getBool('useCustomTheme') ?? false),
                       ),
                       SettingsTile(
                         title: const Text('Background Color'),
                         leading: const Icon(Icons.format_color_fill),
                         trailing: _makeColorPicker("bgColor", prefs.data!),
-                        enabled: false,
+                        enabled:
+                            (prefs.data?.getBool('useCustomTheme') ?? false) &&
+                                !(prefs.data?.getBool('useDeviceBg') ?? true),
                       ),
                       SettingsTile(
                         title: const Text('Border Color'),
                         leading: const Icon(Icons.format_color_fill),
                         trailing: _makeColorPicker("borderColor", prefs.data!),
-                        enabled: false,
+                        enabled:
+                            (prefs.data?.getBool('useCustomTheme') ?? false),
                       ),
                       SettingsTile(
                         title: const Text('Search Bar Color'),
                         leading: const Icon(Icons.format_color_fill),
                         trailing: _makeColorPicker("barColor", prefs.data!),
-                        enabled: false,
+                        enabled:
+                            (prefs.data?.getBool('useCustomTheme') ?? false),
                       ),
                     ],
                   ),
