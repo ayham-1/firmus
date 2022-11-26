@@ -9,8 +9,7 @@ import "package:shared_preferences/shared_preferences.dart";
 
 import "views/item.dart";
 
-final settingsProvider =
-    FutureProvider<SharedPreferences>((ref) => SharedPreferences.getInstance());
+late SharedPreferences prefs;
 
 enum ViewMode {
   showingNone,
@@ -20,12 +19,9 @@ enum ViewMode {
 
 enum ItemDisplayMode { grid, list }
 
-final viewMode =
-    StateProvider<ViewMode>((ref) => ref.watch(settingsProvider).when(
-          error: (e, s) => ViewMode.showingNone,
-          loading: () => ViewMode.showingNone,
-          data: (prefs) => ViewMode.values[prefs.getInt("startupPage") ?? 0],
-        ));
+final viewMode = StateProvider<ViewMode>(
+  (ref) => ViewMode.values[prefs.getInt("startupPage") ?? 0],
+);
 
 final itemDisplayProvider =
     StateProvider<ItemDisplayMode>((ref) => ItemDisplayMode.grid);
@@ -153,15 +149,13 @@ final itemListProvider = FutureProvider<List<ItemView>>((ref) async {
           }
         });
 
-    ref.watch(settingsProvider).whenData((prefs) async {
-      if ((prefs.getBool("preferAppsOverContacts") ?? false)) {
-        filterApps();
-        filterContacts();
-      } else {
-        filterContacts();
-        filterApps();
-      }
-    });
+    if ((prefs.getBool("preferAppsOverContacts") ?? false)) {
+      filterApps();
+      filterContacts();
+    } else {
+      filterContacts();
+      filterApps();
+    }
 
     return result;
   } else {

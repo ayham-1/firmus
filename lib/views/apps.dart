@@ -46,15 +46,11 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
                                 ref.read(viewMode.notifier).state =
                                     ViewMode.showingNone;
                               } else {
-                                ref
-                                    .watch(settingsProvider)
-                                    .whenData((prefs) async {
-                                  if (!(prefs.getBool("disableHistory") ??
-                                      false)) {
-                                    ref.read(viewMode.notifier).state =
-                                        ViewMode.showingHistory;
-                                  }
-                                });
+                                if (!(prefs.getBool("disableHistory") ??
+                                    false)) {
+                                  ref.read(viewMode.notifier).state =
+                                      ViewMode.showingHistory;
+                                }
                               }
                             },
                             onLongPress: () {

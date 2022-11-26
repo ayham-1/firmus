@@ -104,12 +104,12 @@ class ItemView extends StatelessWidget {
   void _onTap(WidgetRef ref) {
     if (type == ItemViewType.app) {
       DeviceApps.openApp(packageName);
-      ref.watch(settingsProvider).whenData((prefs) async {
-        if (!(prefs.getBool("disableHistory") ?? false)) {
-          if (!Hive.isBoxOpen("history")) await Hive.openBox("history");
-          Hive.box("history").put(packageName, _toHiveItem());
+      if (!(prefs.getBool("disableHistory") ?? false)) {
+        if (!Hive.isBoxOpen("history")) {
+          Hive.openBox("history")
+              .then((_) => Hive.box("history").put(packageName, _toHiveItem()));
         }
-      });
+      }
     } else if (type == ItemViewType.contact) {
       FlutterContacts.openExternalView(contact.id);
     }

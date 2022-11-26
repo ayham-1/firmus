@@ -24,147 +24,140 @@ class _SettingsState extends State<Settings> {
     return Scaffold(
         appBar: AppBar(title: const Text("firmus Settings")),
         body: Consumer(builder: (context, WidgetRef ref, _) {
-          final prefs = ref.watch(settingsProvider);
-          return prefs.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, s) => Container(),
-              data: (SharedPreferences prefs) => SettingsList(sections: [
-                    SettingsSection(
-                      title: const Text("Behaviour"),
-                      tiles: <SettingsTile>[
-                        SettingsTile(
-                          title: const Text("Startup Page"),
-                          leading: const Icon(Icons.home),
-                          trailing: DropdownButton<String>(
-                            value: pagesList[prefs.getInt("startupPage") ?? 0],
-                            onChanged: (String? toValue) => prefs
-                                .setInt(
-                                    "startupPage", pagesList.indexOf(toValue!))
-                                .then((value) => setState(() => {})),
-                            items: pagesList
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        SettingsTile.switchTile(
-                          onToggle: (value) {
-                            prefs
-                                .setBool("disableHistory", value)
-                                .then((value) => setState(() => {}));
+          return SettingsList(sections: [
+            SettingsSection(
+              title: const Text("Behaviour"),
+              tiles: <SettingsTile>[
+                SettingsTile(
+                  title: const Text("Startup Page"),
+                  leading: const Icon(Icons.home),
+                  trailing: DropdownButton<String>(
+                    value: pagesList[prefs.getInt("startupPage") ?? 0],
+                    onChanged: (String? toValue) => prefs
+                        .setInt("startupPage", pagesList.indexOf(toValue!))
+                        .then((value) => setState(() => {})),
+                    items:
+                        pagesList.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                SettingsTile.switchTile(
+                  onToggle: (value) {
+                    prefs
+                        .setBool("disableHistory", value)
+                        .then((value) => setState(() => {}));
 
-                            if (!Hive.isBoxOpen("history")) {
-                              Hive.openBox("history").then(
-                                  (_) => Hive.deleteBoxFromDisk("history"));
-                            } else {
-                              Hive.deleteBoxFromDisk("history");
-                            }
-                            ref.read(viewMode.notifier).state =
-                                ViewMode.showingNone;
-                          },
-                          initialValue:
-                              prefs.getBool("disableHistory") ?? false,
-                          title: const Text("Disable History (clears it)"),
-                          leading: const Icon(Icons.history),
-                        ),
-                        SettingsTile.switchTile(
-                          onToggle: (value) => prefs
-                              .setBool("preferAppsOverContacts", value)
-                              .then((value) => setState(() => {})),
-                          initialValue: prefs.getBool("preferAppsOverContacts"),
-                          title: const Text(
-                              "Prefer Applications over contacts when searching"),
-                          leading: const Icon(Icons.adb),
-                        ),
-                      ],
-                    ),
-                    SettingsSection(
-                      title: const Text("Appearance"),
-                      tiles: <SettingsTile>[
-                        SettingsTile.switchTile(
-                          onToggle: (value) => prefs
-                              .setBool("leftHandLayout", value)
-                              .then((value) => setState(() => {})),
-                          initialValue: prefs.getBool("leftHandLayout") ?? true,
-                          leading: const Icon(Icons.language),
-                          title: const Text("Left Hand User layout"),
-                        ),
-                        SettingsTile.switchTile(
-                          onToggle: (value) => prefs
-                              .setBool("useGrid", value)
-                              .then((value) => setState(() => {})),
-                          initialValue: prefs.getBool("useGrid") ?? true,
-                          leading: const Icon(Icons.grid_3x3),
-                          title: const Text("Use Grid Layout"),
-                        ),
-                        SettingsTile.switchTile(
-                          onToggle: (value) => prefs
-                              .setBool("useCustomTheme", value)
-                              .then((value) => setState(() => {})),
-                          initialValue:
-                              prefs.getBool("useCustomTheme") ?? false,
-                          leading: const Icon(Icons.format_paint),
-                          title: const Text("Enable custom theme"),
-                        ),
-                      ],
-                    ),
-                    SettingsSection(
-                      title: const Text("Custom Theme"),
-                      tiles: <SettingsTile>[
-                        SettingsTile.switchTile(
-                          onToggle: (value) => prefs
-                              .setBool("useDeviceBg", value)
-                              .then((value) => setState(() => {})),
-                          initialValue: prefs.getBool("useDeviceBg") ?? true,
-                          leading: const Icon(Icons.device_hub),
-                          title: const Text("Use device background"),
-                          enabled: (prefs.getBool("useCustomTheme") ?? false),
-                        ),
-                        SettingsTile(
-                          title: const Text("Background Color"),
-                          leading: const Icon(Icons.format_color_fill),
-                          trailing: _makeColorPicker("bgColor", prefs),
-                          enabled: (prefs.getBool("useCustomTheme") ?? false) &&
-                              !(prefs.getBool("useDeviceBg") ?? true),
-                        ),
-                        SettingsTile(
-                          title: const Text("Border Color"),
-                          leading: const Icon(Icons.format_color_fill),
-                          trailing: _makeColorPicker("borderColor", prefs),
-                          enabled: (prefs.getBool("useCustomTheme") ?? false),
-                        ),
-                        SettingsTile(
-                          title: const Text("Search Bar Color"),
-                          leading: const Icon(Icons.format_color_fill),
-                          trailing: _makeColorPicker("barColor", prefs),
-                          enabled: (prefs.getBool("useCustomTheme") ?? false),
-                        ),
-                      ],
-                    ),
-                    SettingsSection(
-                      title: const Text("About"),
-                      tiles: <SettingsTile>[
-                        SettingsTile(
-                          title: const Text("Created by ayham"),
-                          leading: const Icon(Icons.account_tree),
-                          enabled: false,
-                        ),
-                        SettingsTile(
-                          title: const Text("Website: ayham.xyz"),
-                          leading: const Icon(Icons.leaderboard),
-                          enabled: false,
-                        ),
-                        SettingsTile(
-                          title: const Text("Enjoy!"),
-                          leading: const Icon(Icons.label),
-                          enabled: false,
-                        ),
-                      ],
-                    ),
-                  ]));
+                    if (!Hive.isBoxOpen("history")) {
+                      Hive.openBox("history")
+                          .then((_) => Hive.deleteBoxFromDisk("history"));
+                    } else {
+                      Hive.deleteBoxFromDisk("history");
+                    }
+                    ref.read(viewMode.notifier).state = ViewMode.showingNone;
+                  },
+                  initialValue: prefs.getBool("disableHistory") ?? false,
+                  title: const Text("Disable History (clears it)"),
+                  leading: const Icon(Icons.history),
+                ),
+                SettingsTile.switchTile(
+                  onToggle: (value) => prefs
+                      .setBool("preferAppsOverContacts", value)
+                      .then((value) => setState(() => {})),
+                  initialValue:
+                      prefs.getBool("preferAppsOverContacts") ?? false,
+                  title: const Text(
+                      "Prefer Applications over contacts when searching"),
+                  leading: const Icon(Icons.adb),
+                ),
+              ],
+            ),
+            SettingsSection(
+              title: const Text("Appearance"),
+              tiles: <SettingsTile>[
+                SettingsTile.switchTile(
+                  onToggle: (value) => prefs
+                      .setBool("leftHandLayout", value)
+                      .then((value) => setState(() => {})),
+                  initialValue: prefs.getBool("leftHandLayout") ?? true,
+                  leading: const Icon(Icons.language),
+                  title: const Text("Left Hand User layout (requires restart)"),
+                ),
+                SettingsTile.switchTile(
+                  onToggle: (value) => prefs
+                      .setBool("useGrid", value)
+                      .then((value) => setState(() => {})),
+                  initialValue: prefs.getBool("useGrid") ?? true,
+                  leading: const Icon(Icons.grid_3x3),
+                  title: const Text("Use Grid Layout"),
+                ),
+                SettingsTile.switchTile(
+                  onToggle: (value) => prefs
+                      .setBool("useCustomTheme", value)
+                      .then((value) => setState(() => {})),
+                  initialValue: prefs.getBool("useCustomTheme") ?? false,
+                  leading: const Icon(Icons.format_paint),
+                  title: const Text("Enable custom theme"),
+                ),
+              ],
+            ),
+            SettingsSection(
+              title: const Text("Custom Theme"),
+              tiles: <SettingsTile>[
+                SettingsTile.switchTile(
+                  onToggle: (value) => prefs
+                      .setBool("useDeviceBg", value)
+                      .then((value) => setState(() => {})),
+                  initialValue: prefs.getBool("useDeviceBg") ?? true,
+                  leading: const Icon(Icons.device_hub),
+                  title: const Text("Use device background"),
+                  enabled: (prefs.getBool("useCustomTheme") ?? false),
+                ),
+                SettingsTile(
+                  title: const Text("Background Color"),
+                  leading: const Icon(Icons.format_color_fill),
+                  trailing: _makeColorPicker("bgColor", prefs),
+                  enabled: (prefs.getBool("useCustomTheme") ?? false) &&
+                      !(prefs.getBool("useDeviceBg") ?? true),
+                ),
+                SettingsTile(
+                  title: const Text("Border Color"),
+                  leading: const Icon(Icons.format_color_fill),
+                  trailing: _makeColorPicker("borderColor", prefs),
+                  enabled: (prefs.getBool("useCustomTheme") ?? false),
+                ),
+                SettingsTile(
+                  title: const Text("Search Bar Color"),
+                  leading: const Icon(Icons.format_color_fill),
+                  trailing: _makeColorPicker("barColor", prefs),
+                  enabled: (prefs.getBool("useCustomTheme") ?? false),
+                ),
+              ],
+            ),
+            SettingsSection(
+              title: const Text("About"),
+              tiles: <SettingsTile>[
+                SettingsTile(
+                  title: const Text("Created by ayham"),
+                  leading: const Icon(Icons.account_tree),
+                  enabled: false,
+                ),
+                SettingsTile(
+                  title: const Text("Website: ayham.xyz"),
+                  leading: const Icon(Icons.leaderboard),
+                  enabled: false,
+                ),
+                SettingsTile(
+                  title: const Text("Enjoy!"),
+                  leading: const Icon(Icons.label),
+                  enabled: false,
+                ),
+              ],
+            ),
+          ]);
         }));
   }
 

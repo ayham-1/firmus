@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:firmus/views/apps.dart';
 import 'package:firmus/views/settings.dart';
 import 'package:firmus/views/item.dart';
+import 'package:firmus/state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  prefs = await SharedPreferences.getInstance();
+
   await [
     Permission.contacts,
   ].request();
