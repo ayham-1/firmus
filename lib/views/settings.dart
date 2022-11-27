@@ -84,7 +84,8 @@ class _SettingsState extends State<Settings> {
                       .then((value) => setState(() => {})),
                   initialValue: prefs.getBool("leftHandLayout") ?? true,
                   leading: const Icon(Icons.language),
-                  title: const Text("Left Hand User layout (requires restart)"),
+                  title: const Text(
+                      "Left Hand User layout (requires app restart)"),
                 ),
                 SettingsTile.switchTile(
                   onToggle: (value) => prefs
@@ -95,12 +96,19 @@ class _SettingsState extends State<Settings> {
                   title: const Text("Use Grid Layout"),
                 ),
                 SettingsTile.switchTile(
-                  onToggle: (value) => prefs
-                      .setBool("useCustomTheme", value)
-                      .then((value) => setState(() => {})),
+                  onToggle: (value) {
+                    prefs.setInt("bgColor", Colors.transparent.value);
+                    prefs.setInt("barColor", Colors.grey.shade800.value);
+                    prefs.setInt("borderColor", Colors.yellow.shade800.value);
+
+                    prefs
+                        .setBool("useCustomTheme", value)
+                        .then((value) => setState(() => {}));
+                  },
                   initialValue: prefs.getBool("useCustomTheme") ?? false,
                   leading: const Icon(Icons.format_paint),
-                  title: const Text("Enable custom theme"),
+                  title:
+                      const Text("Enable custom theme (requries app restart)"),
                 ),
               ],
             ),
@@ -119,20 +127,22 @@ class _SettingsState extends State<Settings> {
                 SettingsTile(
                   title: const Text("Background Color"),
                   leading: const Icon(Icons.format_color_fill),
-                  trailing: _makeColorPicker("bgColor", prefs),
+                  trailing: _makeColorPicker("bgColor", prefs, Colors.black),
                   enabled: (prefs.getBool("useCustomTheme") ?? false) &&
                       !(prefs.getBool("useDeviceBg") ?? true),
                 ),
                 SettingsTile(
                   title: const Text("Border Color"),
                   leading: const Icon(Icons.format_color_fill),
-                  trailing: _makeColorPicker("borderColor", prefs),
+                  trailing: _makeColorPicker(
+                      "borderColor", prefs, Colors.yellow.shade800),
                   enabled: (prefs.getBool("useCustomTheme") ?? false),
                 ),
                 SettingsTile(
                   title: const Text("Search Bar Color"),
                   leading: const Icon(Icons.format_color_fill),
-                  trailing: _makeColorPicker("barColor", prefs),
+                  trailing:
+                      _makeColorPicker("barColor", prefs, Colors.grey.shade800),
                   enabled: (prefs.getBool("useCustomTheme") ?? false),
                 ),
               ],
@@ -161,11 +171,12 @@ class _SettingsState extends State<Settings> {
         }));
   }
 
-  Widget _makeColorPicker(String prefColorName, SharedPreferences prefs) {
+  Widget _makeColorPicker(
+      String prefColorName, SharedPreferences prefs, Color defaultColor) {
     return InkWell(
       child: CircleAvatar(
         backgroundColor:
-            Color(prefs.getInt(prefColorName) ?? Colors.blue.value),
+            Color(prefs.getInt(prefColorName) ?? defaultColor.value),
       ),
       onTap: () {
         showDialog(
@@ -175,7 +186,7 @@ class _SettingsState extends State<Settings> {
                   content: SingleChildScrollView(
                     child: BlockPicker(
                       pickerColor: Color(
-                          prefs.getInt(prefColorName) ?? Colors.blue.value),
+                          prefs.getInt(prefColorName) ?? defaultColor.value),
                       onColorChanged: (color) => pickerColor = color,
                     ),
                   ),

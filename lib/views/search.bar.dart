@@ -17,22 +17,23 @@ class SearchBarState extends State<SearchBar> {
   Widget build(BuildContext context) {
     return Consumer(builder: (context, WidgetRef ref, _) {
       searchCircleBtn() => Expanded(
-          flex: 2,
-          child: MaterialButton(
-              onPressed: () {
-                if (ref.read(viewMode.notifier).state ==
-                    ViewMode.showingAllApps) {
-                  ref.read(viewMode.notifier).state = ViewMode.showingNone;
-                } else {
-                  ref.read(viewMode.notifier).state = ViewMode.showingAllApps;
-                }
-              },
-              color: const Color.fromRGBO(51, 49, 49, 1),
-              shape: const CircleBorder(),
-              child: const Image(
-                  image: AssetImage('images/spear.png'),
-                  width: 45,
-                  fit: BoxFit.cover)));
+            flex: 2,
+            child: MaterialButton(
+                onPressed: () {
+                  if (ref.read(viewMode.notifier).state ==
+                      ViewMode.showingAllApps) {
+                    ref.read(viewMode.notifier).state = ViewMode.showingNone;
+                  } else {
+                    ref.read(viewMode.notifier).state = ViewMode.showingAllApps;
+                  }
+                },
+                color: Color(
+                    prefs.getInt("barColor") ?? Colors.grey.shade800.value),
+                shape: const CircleBorder(),
+                child: const Image(
+                    image: AssetImage('images/spear.png'),
+                    fit: BoxFit.contain)),
+          );
       searchBar() => Expanded(
           flex: 8,
           child: TextField(
@@ -59,14 +60,19 @@ class SearchBarState extends State<SearchBar> {
               decoration: InputDecoration(
                 filled: true,
                 isDense: true,
-                fillColor: const Color.fromRGBO(51, 49, 49, 1),
+                fillColor: Color(
+                    prefs.getInt("barColor") ?? Colors.grey.shade800.value),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(40),
-                  borderSide: const BorderSide(),
+                  borderSide: BorderSide(
+                      color: Color(prefs.getInt("borderColor") ??
+                          Colors.yellow.shade800.value)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(40),
-                  borderSide: const BorderSide(),
+                  borderSide: BorderSide(
+                      color: Color(prefs.getInt("borderColor") ??
+                          Colors.yellow.shade800.value)),
                 ),
               )));
 

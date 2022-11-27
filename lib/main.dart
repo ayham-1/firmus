@@ -35,14 +35,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'firmus',
         theme: ThemeData(
-          backgroundColor: Colors.transparent,
-          scaffoldBackgroundColor: Colors.transparent,
-          primarySwatch: Colors.brown,
+          backgroundColor:
+              Color(prefs.getInt("bgColor") ?? Colors.transparent.value),
+          scaffoldBackgroundColor:
+              Color(prefs.getInt("bgColor") ?? Colors.transparent.value),
+          primarySwatch: Colors.grey,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
-          backgroundColor: Colors.transparent,
-          scaffoldBackgroundColor: Colors.transparent,
+          backgroundColor:
+              Color(prefs.getInt("bgColor") ?? Colors.transparent.value),
+          scaffoldBackgroundColor:
+              Color(prefs.getInt("bgColor") ?? Colors.transparent.value),
         ),
         routes: {
           '/': (context) => const AppsPage(),
