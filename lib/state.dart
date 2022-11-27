@@ -23,8 +23,10 @@ final viewMode = StateProvider<ViewMode>(
   (ref) => ViewMode.values[prefs.getInt("startupPage") ?? 0],
 );
 
-final itemDisplayProvider =
-    StateProvider<ItemDisplayMode>((ref) => ItemDisplayMode.grid);
+final itemDisplayProvider = StateProvider<ItemDisplayMode>((ref) =>
+    (prefs.getBool("useGrid") ?? true)
+        ? ItemDisplayMode.grid
+        : ItemDisplayMode.list);
 
 final searchTerms = StateProvider<String>((ref) => "");
 

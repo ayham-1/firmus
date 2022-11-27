@@ -94,6 +94,7 @@ class ItemView extends StatelessWidget {
           title: Label(label: label),
           onTap: () => _onTap(ref),
           onLongPress: () => _onLongPress(context, ref),
+          contentPadding: const EdgeInsets.all(3),
         );
       } else {
         return Container();
@@ -108,6 +109,8 @@ class ItemView extends StatelessWidget {
         if (!Hive.isBoxOpen("history")) {
           Hive.openBox("history")
               .then((_) => Hive.box("history").put(packageName, _toHiveItem()));
+        } else {
+          Hive.box("history").put(packageName, _toHiveItem());
         }
       }
     } else if (type == ItemViewType.contact) {
