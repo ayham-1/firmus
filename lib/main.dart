@@ -12,6 +12,7 @@ import 'package:firmus/state.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // settings startup config
   prefs = await SharedPreferences.getInstance();
 
   await [
@@ -32,25 +33,23 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'firmus',
-        theme: ThemeData(
-          backgroundColor:
-              Color(prefs.getInt("bgColor") ?? Colors.transparent.value),
-          scaffoldBackgroundColor:
-              Color(prefs.getInt("bgColor") ?? Colors.transparent.value),
-          primarySwatch: Colors.grey,
-        ),
-        darkTheme: ThemeData(
-          brightness: Brightness.dark,
-          backgroundColor:
-              Color(prefs.getInt("bgColor") ?? Colors.transparent.value),
-          scaffoldBackgroundColor:
-              Color(prefs.getInt("bgColor") ?? Colors.transparent.value),
-        ),
-        routes: {
-          '/': (context) => const AppsPage(),
-          '/settings': (context) => const Settings(),
-        });
+    return Consumer(builder: (context, WidgetRef ref, _) {
+      return MaterialApp(
+          title: 'firmus',
+          theme: ThemeData(
+            backgroundColor: ref.watch(bgColor),
+            scaffoldBackgroundColor: ref.watch(bgColor),
+            primarySwatch: Colors.grey,
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            backgroundColor: ref.watch(bgColor),
+            scaffoldBackgroundColor: ref.watch(bgColor),
+          ),
+          routes: {
+            '/': (context) => const AppsPage(),
+            '/settings': (context) => const Settings(),
+          });
+    });
   }
 }

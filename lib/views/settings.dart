@@ -84,13 +84,19 @@ class _SettingsState extends State<Settings> {
                       .then((value) => setState(() => {})),
                   initialValue: prefs.getBool("leftHandLayout") ?? true,
                   leading: const Icon(Icons.language),
-                  title: const Text(
-                      "Left Hand User layout (requires app restart)"),
+                  title: const Text("Left Hand User layout"),
                 ),
                 SettingsTile.switchTile(
-                  onToggle: (value) => prefs
-                      .setBool("useGrid", value)
-                      .then((value) => setState(() => {})),
+                  onToggle: (value) {
+                    prefs
+                        .setBool("useGrid", value)
+                        .then((value) => setState(() => {}));
+
+                    ref.read(itemDisplayProvider.notifier).state =
+                        (prefs.getBool("useGrid") ?? true)
+                            ? ItemDisplayMode.grid
+                            : ItemDisplayMode.list;
+                  },
                   initialValue: prefs.getBool("useGrid") ?? true,
                   leading: const Icon(Icons.grid_3x3),
                   title: const Text("Use Grid Layout"),
@@ -107,8 +113,7 @@ class _SettingsState extends State<Settings> {
                   },
                   initialValue: prefs.getBool("useCustomTheme") ?? false,
                   leading: const Icon(Icons.format_paint),
-                  title:
-                      const Text("Enable custom theme (requries app restart)"),
+                  title: const Text("Enable custom theme"),
                 ),
               ],
             ),
@@ -127,7 +132,8 @@ class _SettingsState extends State<Settings> {
                 SettingsTile(
                   title: const Text("Background Color"),
                   leading: const Icon(Icons.format_color_fill),
-                  trailing: _makeColorPicker("bgColor", prefs, Colors.black),
+                  trailing:
+                      _makeColorPicker("bgColor", prefs, Colors.transparent),
                   enabled: (prefs.getBool("useCustomTheme") ?? false) &&
                       !(prefs.getBool("useDeviceBg") ?? true),
                 ),

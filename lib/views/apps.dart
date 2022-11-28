@@ -29,7 +29,9 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
         ref.watch(appsProvider);
         ref.watch(contactsProvider);
         final itemListProv = ref.watch(itemListProvider);
-        final mode = ref.watch(itemDisplayProvider);
+        final mode = (prefs.getBool("useGrid") ?? true)
+            ? ItemDisplayMode.grid
+            : ItemDisplayMode.list;
         return Scaffold(
             extendBodyBehindAppBar: false,
             appBar: null,
@@ -54,7 +56,21 @@ class AppsPageState extends State<AppsPage> with AutomaticKeepAliveClientMixin {
                               }
                             },
                             onLongPress: () {
-                              Navigator.pushNamed(context, "/settings");
+                              Navigator.of(context)
+                                  .pushNamed("/settings")
+                                  .then((_) => setState(() {
+                                        ref.read(bgColor.notifier).state =
+                                            Color(prefs.getInt("bgColor") ??
+                                                Colors.transparent.value);
+
+                                        ref.read(borderColor.notifier).state =
+                                            Color(prefs.getInt("borderColor") ??
+                                                Colors.yellow.shade800.value);
+
+                                        ref.read(barColor.notifier).state =
+                                            Color(prefs.getInt("barColor") ??
+                                                Colors.grey.shade800.value);
+                                      }));
                               HapticFeedback.lightImpact();
                             },
                             child: mode.name == ItemDisplayMode.list.name

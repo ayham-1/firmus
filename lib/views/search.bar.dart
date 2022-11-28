@@ -27,8 +27,7 @@ class SearchBarState extends State<SearchBar> {
                     ref.read(viewMode.notifier).state = ViewMode.showingAllApps;
                   }
                 },
-                color: Color(
-                    prefs.getInt("barColor") ?? Colors.grey.shade800.value),
+                color: ref.watch(barColor),
                 shape: const CircleBorder(),
                 child: const Image(
                     image: AssetImage('images/spear.png'),
@@ -60,19 +59,14 @@ class SearchBarState extends State<SearchBar> {
               decoration: InputDecoration(
                 filled: true,
                 isDense: true,
-                fillColor: Color(
-                    prefs.getInt("barColor") ?? Colors.grey.shade800.value),
+                fillColor: ref.watch(barColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(40),
-                  borderSide: BorderSide(
-                      color: Color(prefs.getInt("borderColor") ??
-                          Colors.yellow.shade800.value)),
+                  borderSide: BorderSide(color: ref.watch(borderColor)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(40),
-                  borderSide: BorderSide(
-                      color: Color(prefs.getInt("borderColor") ??
-                          Colors.yellow.shade800.value)),
+                  borderSide: BorderSide(color: ref.watch(borderColor)),
                 ),
               )));
 

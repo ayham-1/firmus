@@ -20,13 +20,22 @@ enum ViewMode {
 enum ItemDisplayMode { grid, list }
 
 final viewMode = StateProvider<ViewMode>(
-  (ref) => ViewMode.values[prefs.getInt("startupPage") ?? 0],
+  (_) => ViewMode.values[prefs.getInt("startupPage") ?? 0],
 );
 
 final itemDisplayProvider = StateProvider<ItemDisplayMode>((ref) =>
     (prefs.getBool("useGrid") ?? true)
         ? ItemDisplayMode.grid
         : ItemDisplayMode.list);
+
+final barColor = StateProvider<Color>(
+    (ref) => Color(prefs.getInt("barColor") ?? Colors.grey.shade800.value));
+
+final borderColor = StateProvider<Color>((ref) =>
+    Color(prefs.getInt("borderColor") ?? Colors.yellow.shade800.value));
+
+final bgColor = StateProvider<Color>(
+    (ref) => Color(prefs.getInt("bgColor") ?? Colors.transparent.value));
 
 final searchTerms = StateProvider<String>((ref) => "");
 
